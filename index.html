@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+<meta charset="UTF-8">
+<title>AI塔罗完整系统</title>
+
+<style>
+
+body {
+    margin: 0;
+    background: radial-gradient(circle at top, #1a1a2e, #000);
+    color: white;
+    font-family: sans-serif;
+    text-align: center;
+}
+
+/* 标题 */
+h1 { margin-top: 20px; }
+
+/* 输入框（你要的，保留完整） */
+input {
+    padding: 10px;
+    width: 320px;
+    border-radius: 8px;
+    border: none;
+    margin-top: 10px;
+}
+
+/* 按钮 */
+button {
+    padding: 10px 16px;
+    margin: 6px;
+    border: none;
+    border-radius: 8px;
+    background: purple;
+    color: white;
+    cursor: pointer;
+}
+
+/* 桌面 */
+.table {
+    position: relative;
+    width: 100%;
+    height: 520px;
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 卡牌 */
+.card {
+    width: 140px;
+    height: 220px;
+    position: absolute;
+    opacity: 0;
+    transition: all 0.8s ease;
+}
+
+.card-inner {
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.8s;
+}
+
+.card.flipped .card-inner {
+    transform: rotateY(180deg);
+}
+
+.face {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    backface-visibility: hidden;
+    border-radius: 10px;
+}
+
+.front {
+    transform: rotateY(180deg);
+}
+
+/* 逆位 */
+.front {
+    transform: rotateY(180deg);
+}
+
+.front.reversed {
+    transform: rotateY(180deg) scaleY(-1);
+}
+/* 解读 */
+#result {
+    margin-top: 20px;
+    padding: 20px;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.8;
+    white-space: pre-line;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* 状态 */
+#status {
+    margin-top: 10px;
+    opacity: 0.8;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>🔮 AI塔罗完整系统</h1>
+
+<!-- ✔ 输入框完整保留 -->
+<input id="question" placeholder="请输入你的问题">
+
+<br>
+
+<button onclick="draw(1)">单牌</button>
+<button onclick="draw(3)">三牌</button>
+<button onclick="draw(5)">五牌</button>
+
+<p id="status">等待命运展开...</p>
+
+<div class="table" id="table"></div>
+
+<pre id="result"></pre>
+
+<script>
+
+/* 🃏 牌库 */
+let cards = [
+"愚者","魔术师","女祭司","女皇","皇帝",
+"教皇","恋人","战车","力量","隐者",
+"命运之轮","正义","倒吊人","死神","节制",
+"恶魔","塔","星星","月亮","太阳",
+"审判","世界"
+];
+
+/* 🖼️ 映射 */
+let cardMap = {
+"愚者":"The_Fool.png",
+"魔术师":"The_Magician.png",
+"女祭司":"The_Priestess.png",
+"女皇":"The_Empress.png",
+"皇帝":"The_Emperor.png",
+"教皇":"The_Hierophant.png",
+"恋人":"The_Lovers.png",
+"战车":"The_Chariot.png",
+"力量":"The_Strength.png",
+"隐者":"The_Hermit.png",
+"命运之轮":"The_Wheel_of_Fortune.png",
+"正义":"The_Justice.png",
+"倒吊人":"The_Hanged_Man.png",
+"死神":"The_Death.png",
+"节制":"The_Temperance.png",
+"恶魔":"The_Devil.png",
+"塔":"The_Tower.png",
+"星星":"The_Star.png",
+"月亮":"The_Moon.png",
+"太阳":"The_Sun.png",
+"审判":"The_Judgement.png",
+"世界":"The_World.png"
+};
+
+/* 🎲 抽牌 */
+function pickCard(){
+    return {
+        name: cards[Math.floor(Math.random()*cards.length)],
+        position: Math.random()>0.5 ? "正位":"逆位"
+    };
+}
+
+/* 🔮 主流程 */
+async function draw(count){
+
+    let q = document.getElementById("question").value;
+    if(!q){
+        alert("请输入问题");
+        return;
+    }
+
+    let table = document.getElementById("table");
+    table.innerHTML = "";
+    document.getElementById("result").innerText = "";
+    document.getElementById("status").innerText = "🔮 命运展开中...";
+
+    let result = [];
+    for(let i=0;i<count;i++) result.push(pickCard());
+
+    /* ✔ 自动居中布局（稳定版） */
+    let spacing = 180;
+    let start = -(count-1)*spacing/2;
+
+    let domList = [];
+
+    for(let i=0;i<count;i++){
+
+        let card = createCard(result[i]);
+
+        let x = start + i*spacing;
+
+        card.style.transform = `translate(-50%,-50%) translateX(${x}px)`;
+
+        card.style.zIndex = i;
+
+        table.appendChild(card);
+
+        domList.push(card);
+    }
+
+    /* ✔ 顺序翻牌（稳定） */
+    for(let i=0;i<domList.length;i++){
+
+        await sleep(600);
+
+        let card = domList[i];
+
+        card.style.opacity = 1;
+
+       requestAnimationFrame(() => {
+    card.classList.add("flipped");
+});
+    }
+
+    document.getElementById("status").innerText = "🔮 AI解读中...";
+
+    let text = result.map((r,i)=>
+        `第${i+1}张：${r.name}（${r.position}）`
+    ).join("\n");
+
+    let ai = await callAI(q, text);
+
+    document.getElementById("result").innerText = ai;
+
+    document.getElementById("status").innerText = "🔮 命运已显现";
+}
+
+/* 🃏 卡牌 */
+function createCard(data){
+
+    let div = document.createElement("div");
+    div.className = "card";
+
+    div.innerHTML = `
+        <div class="card-inner">
+            <img class="face back" src="img/back.png">
+            <img class="face front ${data.position==='逆位'?'reversed':''}"
+                 src="img/${cardMap[data.name]}">
+        </div>
+    `;
+
+    return div;
+}
+
+/* 🤖 AI */
+async function callAI(question, cardsText){
+
+    const YOUR_API_KEY = "sk-9697ca967f174d5182628360a195c087";
+
+    try {
+        let res = await fetch("https://api.deepseek.com/v1/chat/completions", {
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json",
+                "Authorization":"Bearer " + YOUR_API_KEY
+            },
+            body: JSON.stringify({
+                model:"deepseek-chat",
+                messages:[{
+                    role:"user",
+                    content:`
+你是塔罗占卜师。你的回答要贴合问题，并且简单易懂不要故弄玄虚，让用户能清晰的理解你的意思，不可以用太深奥的词汇。
+
+问题：${question}
+
+牌阵：
+${cardsText}
+
+请给出神秘解读，不要提AI。
+                    `
+                }]
+            })
+        });
+
+        let data = await res.json();
+        return data.choices?.[0]?.message?.content || "无解读";
+
+    } catch(e){
+        return "🔮 命运无法连接";
+    }
+}
+
+/* ⏳ */
+function sleep(ms){
+    return new Promise(r=>setTimeout(r,ms));
+}
+
+</script>
+
+</body>
+</html>
