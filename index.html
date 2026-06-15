@@ -53,12 +53,14 @@ button {
     width: 100%;
     min-height: 520px;
     margin-top: 30px;
+
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 10px;
-}
 
+    padding: 10px;
+    overflow: visible;
+}
 .card {
     width: 140px;
     height: 220px;
@@ -192,13 +194,22 @@ let cardMap = {
 };
 
 /* 🎲 抽牌 */
-function pickCard(){
-    return {
-        name: cards[Math.floor(Math.random()*cards.length)],
-        position: Math.random()>0.5 ? "正位":"逆位"
-    };
+let shuffledDeck = [];
+
+function shuffle(deck) {
+    return deck.sort(() => Math.random() - 0.5);
 }
 
+function initDeck(deck) {
+    shuffledDeck = shuffle([...deck]);
+}
+
+function drawCard() {
+    if (shuffledDeck.length === 0) {
+        initDeck(cards); // 重置
+    }
+    return shuffledDeck.pop();
+}
 /* 🔮 主流程 */
 async function draw(count){
 
