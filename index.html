@@ -48,6 +48,17 @@ button {
     box-sizing: border-box;
 }
 /* 卡牌 */
+.table {
+    position: relative;
+    width: 100%;
+    min-height: 520px;
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
+
 .card {
     width: 140px;
     height: 220px;
@@ -55,16 +66,8 @@ button {
     opacity: 0;
     transition: all 0.8s ease;
 }
-@media (max-width: 768px) {
-    .card {
-        width: 90px;
-        height: 140px;
-    }
 
-    .table {
-        min-height: 420px;
-    }
-}.card-inner {
+.card-inner {
     width: 100%;
     height: 100%;
     transform-style: preserve-3d;
@@ -87,6 +90,20 @@ button {
     transform: rotateY(180deg);
 }
 
+.front.reversed {
+    transform: rotateY(180deg) scaleY(-1);
+}
+
+@media (max-width: 768px) {
+    .card {
+        width: 90px;
+        height: 140px;
+    }
+
+    .table {
+        min-height: 420px;
+    }
+}
 /* 逆位 */
 .front {
     transform: rotateY(180deg);
